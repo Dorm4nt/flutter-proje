@@ -1,45 +1,43 @@
 // lib/models/user_model.dart
+
 class UserModel {
   final String id;
-  final String email;
   final String fullName;
-  final String? phoneNumber;
-  final String? address;
-  final String role; // 'admin' veya 'user'
-  final DateTime createdAt;
+  final String email;
+  final String userType; // Role yerine userType
+  final String phoneNumber;
+  final String address;
 
   UserModel({
     required this.id,
-    required this.email,
     required this.fullName,
-    this.phoneNumber,
-    this.address,
-    this.role = 'user',
-    required this.createdAt,
+    required this.email,
+    required this.userType,
+    this.phoneNumber = '', 
+    this.address = '',     
   });
 
-  factory UserModel.fromMap(Map<String, dynamic> map, String id) {
+  // Firestore'dan veri çekerken
+  factory UserModel.fromMap(Map<String, dynamic> data, String documentId) {
     return UserModel(
-      id: id,
-      email: map['email'] ?? '',
-      fullName: map['fullName'] ?? '',
-      phoneNumber: map['phoneNumber'],
-      address: map['address'],
-      role: map['role'] ?? 'user',
-      createdAt: map['createdAt'] != null 
-          ? DateTime.parse(map['createdAt']) 
-          : DateTime.now(),
+      id: documentId,
+      fullName: data['fullName'] ?? '',
+      email: data['email'] ?? '',
+      // Hem 'userType' hem 'role' alanını kontrol edip hata riskini sıfıra indirdik
+      userType: data['userType'] ?? data['role'] ?? 'user', 
+      phoneNumber: data['phoneNumber'] ?? '',
+      address: data['address'] ?? '',
     );
   }
 
+  // Firestore'a veri yazarken
   Map<String, dynamic> toMap() {
     return {
-      'email': email,
       'fullName': fullName,
+      'email': email,
+      'userType': userType,
       'phoneNumber': phoneNumber,
       'address': address,
-      'role': role,
-      'createdAt': createdAt.toIso8601String(),
     };
   }
 }

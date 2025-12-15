@@ -1,9 +1,11 @@
+// lib/screens/login_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'home_screen.dart';
 import 'admin/admin_home_screen.dart'; 
-import 'registration_screen.dart'; // Kayıt ekranını import et (Dosyayı oluşturduysan)
+import 'registration_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,9 +15,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Test kolaylığı için default değerler
-  final _emailController = TextEditingController(text: "admin@pokemart.com"); 
-  final _passwordController = TextEditingController(text: "123456");
+  final _emailController = TextEditingController(text: "pokemart240@gmail.com"); 
+  final _passwordController = TextEditingController(text: "106622ERol");
 
   @override
   void dispose() {
@@ -37,19 +38,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      if (auth.currentUser != null && auth.currentUser!.role == 'admin') {
-        // Admin ise Admin Paneline git
+      // DÜZELTME: role yerine userType kullanıldı
+      debugPrint("GİRİŞ BAŞARILI. KULLANICI TİPİ: ${auth.currentUser?.userType}");
+
+      // YÖNLENDİRME MANTIĞI
+      if (auth.currentUser != null && auth.currentUser!.userType == 'admin') {
+        debugPrint(">> Admin Paneline Yönlendiriliyor...");
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
         );
       } else {
-        // Normal kullanıcı ise Ana Sayfaya git
+        debugPrint(">> Ana Sayfaya Yönlendiriliyor...");
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       }
       
     } catch (error) {
+      debugPrint("Giriş Hatası: $error");
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Giriş başarısız: $error"), 
@@ -89,11 +96,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       const Text(
                         "POKEMART", 
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFFCC0000))
                       ),
                       const SizedBox(height: 32),
                       
-                      // E-POSTA ALANI
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -105,7 +111,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 16),
                       
-                      // ŞİFRE ALANI
                       TextField(
                         controller: _passwordController,
                         obscureText: true,
@@ -117,7 +122,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
                       
-                      // GİRİŞ BUTONU
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -129,27 +133,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           onPressed: isLoading ? null : _submit,
                           child: isLoading 
-                              ? const SizedBox(
-                                  height: 24, 
-                                  width: 24, 
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                                )
+                              ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                               : const Text("GİRİŞ YAP", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(height: 16),
                       
-                      // Kayıt Ol butonu
                       TextButton(
                         onPressed: isLoading ? null : () {
-                          // Eğer RegistrationScreen'i henüz oluşturmadıysan burayı yoruma alabilirsin
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const RegistrationScreen())
                           );
                         },
                         child: const Text(
                           "Hesabın yok mu? KAYIT OL",
-                          style: TextStyle(color: Colors.white70), // Arka plan kırmızı olduğu için beyaz yazı
+                          style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold), 
                         ),
                       )
                     ],

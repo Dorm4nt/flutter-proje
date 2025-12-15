@@ -1,3 +1,5 @@
+// lib/screens/cart_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
@@ -100,7 +102,6 @@ class _CartScreenState extends State<CartScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                    // DÜZELTİLDİ: withOpacity -> withAlpha
                     boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 10, offset: const Offset(0, -5))],
                   ),
                   child: Column(
@@ -144,10 +145,13 @@ class _CartScreenState extends State<CartScreen> {
                                   }
 
                                   try {
+                                    // DÜZELTİLDİ: user.address null olamaz (String), bu yüzden isEmpty kontrolü yapıyoruz
+                                    final shippingAddress = user.address.isEmpty ? "Adres Girilmemiş" : user.address;
+
                                     await Provider.of<OrderProvider>(context, listen: false).addOrder(
                                       cartItemsList,
                                       cart.totalAmount,
-                                      user.address ?? "Adres Girilmemiş", 
+                                      shippingAddress, 
                                       user.id,
                                       user.email
                                     );

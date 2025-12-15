@@ -1,5 +1,16 @@
-// Sipariş durumu için Enum
-enum OrderStatus { waiting, preparing, shipping, delivered, cancelled }
+// lib/models/order_model.dart
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// DÜZELTİLDİ: Enum listesini diğer dosyalarla (OrdersScreen) uyumlu hale getirdik.
+// Fazladan olan 'preparing', 'shipping' gibi durumları kaldırdık.
+enum OrderStatus { 
+  waiting, 
+  confirmed, 
+  shipped, 
+  delivered, 
+  cancelled 
+}
 
 class OrderItem {
   final String productId;
@@ -16,7 +27,6 @@ class OrderItem {
     required this.imageUrl,
   });
   
-  // Firebase uyumluluğu için
   Map<String, dynamic> toMap() => {
     'productId': productId,
     'productName': productName,
@@ -37,10 +47,10 @@ class OrderItem {
 class OrderModel {
   final String id;
   final String userId;
-  final String userEmail; // Adminin kimin sipariş verdiğini görmesi için
+  final String userEmail;
   final double totalAmount;
   final DateTime orderDate;
-  final OrderStatus status; // Enum kullanımı
+  final OrderStatus status;
   final String shippingAddress;
   final List<OrderItem> items;
 
@@ -60,20 +70,32 @@ class OrderModel {
       'userId': userId,
       'userEmail': userEmail,
       'totalAmount': totalAmount,
-      'orderDate': orderDate.toIso8601String(),
-      'status': status.name, // Enum'ı string olarak kaydeder (örn: "preparing")
+      'orderDate': orderDate, // Firestore bunu Timestamp'e çevirecek (OrderProvider içinde yönetiliyor)
+      'status': status.name,
       'shippingAddress': shippingAddress,
       'items': items.map((x) => x.toMap()).toList(),
     };
   }
 
   factory OrderModel.fromMap(Map<String, dynamic> map, String id) {
+    DateTime date;
+    
+    // Tarih dönüşüm mantığı (Timestamp veya String)
+    if (map['orderDate'] is Timestamp) {
+      date = (map['orderDate'] as Timestamp).toDate();
+    } else if (map['orderDate'] is String) {
+      date = DateTime.parse(map['orderDate']);
+    } else {
+      date = DateTime.now();
+    }
+
     return OrderModel(
       id: id,
       userId: map['userId'] ?? '',
       userEmail: map['userEmail'] ?? '',
       totalAmount: (map['totalAmount'] ?? 0).toDouble(),
-      orderDate: DateTime.parse(map['orderDate']),
+      orderDate: date,
+      // Enum dönüşümü (Hata korumalı)
       status: OrderStatus.values.firstWhere(
           (e) => e.name == map['status'], 
           orElse: () => OrderStatus.waiting),

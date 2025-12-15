@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/product.dart';
+import '../models/product.dart'; 
 import '../providers/cart_provider.dart';
-import '../providers/product_provider.dart'; 
+import '../providers/favorites_provider.dart'; 
 import '../screens/product_detail_screen.dart';
 
 class ProductCard extends StatelessWidget {
-  final Product product;
+  final Product product; // DÜZELTİLDİ: ProductModel yerine Product
   const ProductCard({super.key, required this.product});
 
   @override
@@ -19,7 +19,6 @@ class ProductCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          // DÜZELTİLDİ: withOpacity -> withAlpha
           boxShadow: [BoxShadow(color: Colors.grey.withAlpha(25), spreadRadius: 1, blurRadius: 5, offset: const Offset(0, 3))],
         ),
         child: Column(
@@ -41,27 +40,30 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  
                   Positioned(
                     top: 0,
                     right: 0,
-                    child: Consumer<ProductProvider>(
-                      builder: (_, prodProv, __) {
-                        final isFav = prodProv.isFavorite(product.id);
+                    child: Consumer<FavoritesProvider>(
+                      builder: (_, favsProv, __) {
+                        final isFav = favsProv.isFavorite(product.id);
                         return IconButton(
                           icon: Icon(isFav ? Icons.favorite : Icons.favorite_border),
                           color: isFav ? Colors.red : Colors.grey.shade400,
-                          onPressed: () => prodProv.toggleFavorite(product.id),
+                          onPressed: () {
+                            favsProv.toggleFavoriteStatus(product);
+                          },
                         );
                       },
                     ),
                   ),
+                  
                   Positioned(
                     bottom: 0,
                     left: 0,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        // DÜZELTİLDİ: withOpacity -> withAlpha
                         color: Colors.black.withAlpha(13),
                         borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
                       ),
